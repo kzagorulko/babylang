@@ -59,7 +59,6 @@ public:
 
 class Lexer {
 private:
-private:
     std::string src;
     int pos;
     std::list<Token> tokens;
