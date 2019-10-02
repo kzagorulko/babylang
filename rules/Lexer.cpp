@@ -27,16 +27,12 @@ std::list<Token> Lexer::lex() {
         for (size_t i: ITERIBLE_TOKEN_TYPES) {
             std::smatch m;
             
-
             std::regex r(TOKEN_REGEX[i]);
             
             std::string reg = TOKEN_REGEX[i];
             
             const std::string SEARCH_SUBSTR = this->src.substr(pos);
             const std::string MATCH_SUBSTR  = this->src.substr(pos, 1);
-            
-//            bool cond1 = std::regex_search(SEARCH_SUBSTR, m, r);
-//            bool cond2 = std::regex_match(MATCH_SUBSTR, r);
 
             if (std::regex_search(SEARCH_SUBSTR, m, r) && std::regex_match(MATCH_SUBSTR, r)) {
                 
@@ -46,7 +42,6 @@ std::list<Token> Lexer::lex() {
                 
                 return true;
             }
-
         }
         throw "Unknown symbol";
     }());
