@@ -344,6 +344,149 @@ class Lexer {
 }
 ```
 
-
-	
+# Реализация конечного автомата
   
+## Лексика
+VT = {ASCII}; <выражение> = (<цифра>(<буква>|<цифра>)+|`+`|`-`|`*`|`/`|`(`|`)`|`<пробел>`+)*
+
+## Грамматика
+
+VT = {число, ид, `+`, `-`, `*`, `/`, `(`, `)`}
+
+<выражение> ::= число(`+` число)*
+
+1. <П> ::= a ->O-a→(O)
+2. <П> ::= <П1><П2> пересечение П1 с П2
+3. <П> ::= <П1>|<П2> объединение
+4. <П> ::= <П1>*
+
+[https://yadi.sk/i/PylCkteZuT84bA] -> [https://yadi.sk/d/FwCG_yOepvxGfw]
+
+
+S   | число    | +
+----|----------|------
+S_0 | S_2, S_5 | -
+S_2 | -        | S_3
+S_3 | S_2, S_5 | -
+S_5 | -        | -
+
+
+ S    | число | +
+------|-------|---
+S_0   | S_2,5 | -
+S_1   | S_2,5 | -
+S_2,5 | -     | S_3
+
+https://yadi.sk/i/B8kI4RpU4I48PQ
+
+```java
+enum State {
+	S_0, S_FINAL, S_LOOP
+}
+class Parser {
+	Token[] tokens; //char[] symbols;
+	int pos = 0;
+	
+	Parser(tokens, pos) { //Parser(symbols, pos) {
+		this.tokens = tokens; //this.symbols = symbols;
+		this.pos = pos;
+	}
+	
+	void error(String message) {
+		throw new RuntimeException(message + " at " + pos);
+	}
+	
+	boolean match(char expected) {
+		if (pos < symbols.length) {
+			char ch = symbols[pos];
+			if (ch == expected) {
+				pos++;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	State newState(State s) {
+		switch (s) {
+			case S_0:
+			case S_LOOP:
+				if (match('4')) {
+					return State.S_FINAL;
+				}
+				error("Ожидаось Число");
+			case S_FINAL:
+				if (match('+')) {
+					return State.S_LOOP;
+				}
+				error("Ожидался +");
+		}
+	}
+	
+	boolean parse() { // boolean run() {
+		State s = State.S_0;
+		while (pos < symbols.length) {
+			s = newState(s);
+		}
+		return s == State.S_FINAL;
+	}
+	
+	void runz() {
+		require('ч');
+		while (pos < symbols.length) {
+			require('+');
+			require('ч');
+		}
+	}
+	
+	void requre(char c) {
+		if (!match(c)) {
+			error("Ожидался " + с)ж
+		}
+}
+
+public static void main ( {
+	String text = "4+4";
+	Parser p = new Parser(text.toCharArray());
+	boolean ok = p.run();
+	System.out.print(ok);
+}
+					
+	
+```
+
+
+# Практика 3
+
+<выражение> ::= число ('+', число)*
+
+---
+
+1. <выражение> ::= число
+2. <выражение> ::= число '+' <выражение>
+
+<выражение> -2→ число '+' <выражение> -2→ число '+' число '+' <выражение> -1→ число + число + число
+
+Дерево разбора:
+https://yadi.sk/i/NAk1u__W-OiT1g 
+
+## Пример
+
+<цифра> :: = 0..9
+
+<число> ::= <цифра>
+
+<число> ::= <число><цифра>
+
+У примера такое же дерево, как и выше только с цифрой и числом.
+
+В компиляторах не используют дерево разбора. Используют AST (Abstract Syntax Tree) Абстрактное синтаксическое дерево (модифицированное дерево разбора)
+
+Пример AST для [этого](#Практика 3) дерева разбора: https://yadi.sk/i/gAOXrisirH8JNw
+
+
+((^n))^n n ≥ 0
+
+<скобки> ::= ε
+<скобки> :: '(' <скобки> ')'
+
