@@ -1,8 +1,6 @@
 """
-Parser which works with tokens
+Parser which works with symbols
 """
-from lexer import Lexer, TokenType
-
 class State:
     S_0 = 0
     S_FINAL = 1
@@ -11,14 +9,14 @@ class State:
 
 class Parser:
 
-    def __init__(self, tokens):
-        self.tokens = tokens
+    def __init__(self, text):
+        self.symbols = text
         self.pos = 0
 
-    def match(self, expectedType):
-        if self.pos < len(self.tokens):
-            token = self.tokens[self.pos]
-            if token.type == expectedType:
+    def match(self, expected):
+        if self.pos < len(self.symbols):
+            ch = self.symbols[self.pos]
+            if ch == expected:
                 self.pos += 1
                 return True
 
@@ -26,18 +24,18 @@ class Parser:
 
     def newState(self, s):
         if s == State.S_0 or s == State.S_LOOP:
-            if self.match(TokenType.NUMBER):
+            if self.match('4'):
                 return State.S_FINAL
-            self.error("Ожидалось {}".format(TokenType.NUMBER))
+            self.error("Ожидалось 4")
 
         elif s == State.S_FINAL:
-            if self.match(TokenType.ADD):
+            if self.match('+'):
                 return State.S_LOOP
-            self.error("Ожидался {}".format(TokenType.ADD))
+            self.error("Ожидался +")
 
     def parse(self):
         s = State.S_0
-        for i in range(0, len(self.tokens)):
+        for i in range(0, len(self.symbols)):
             self.pos = i
             s = self.newState(s)
 
@@ -48,10 +46,8 @@ class Parser:
 
 
 if __name__ == '__main__':
-    text = '10+20'
-    l = Lexer(text)
-    tokens = l.lex()
-    parser = Parser(tokens)
+    text = '4+4'
+    parser = Parser(text)
     result = parser.parse()
 
     print(result)

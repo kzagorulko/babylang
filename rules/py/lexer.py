@@ -34,9 +34,9 @@ class Lexer:
                 value = tt.value
 
             result = re.match(value, self.src[self.pos::])
-            
+
             if result is not None:
-                t = Token(value, result.group(0), self.pos)
+                t = Token(tt, result.group(0), self.pos)
                 self.tokens.append(t)
                 self.pos = result.end() + self.pos
                 return True
