@@ -37,8 +37,10 @@ class Lexer:
             result = re.match(value, self.src[self.pos::])
 
             if result is not None:
-                t = Token(tt, result.group(0), self.pos)
-                self.tokens.append(t)
+                # пробелы пропускаем
+                if tt is not TokenType.SPACE:
+                    t = Token(tt, result.group(0), self.pos)
+                    self.tokens.append(t)
                 self.pos = result.end() + self.pos
                 return True
 
