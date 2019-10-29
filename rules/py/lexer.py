@@ -4,6 +4,7 @@ import re
 class TokenType(Enum):
     NUMBER = "[0-9]+",
     ADD = "\\+",
+    MUL = "\\*",
     SPACE = "[ \\t\\r\\n]+",
     ID = "[a-zA-Z_][a-zA-Z0-9_]*"
 
