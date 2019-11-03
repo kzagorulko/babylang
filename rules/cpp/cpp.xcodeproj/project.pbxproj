@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8BE8B3A223682CE3003DC47D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BE8B39F23682CE3003DC47D /* main.cpp */; };
 		8BE8B3A323682CE3003DC47D /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BE8B3A023682CE3003DC47D /* Lexer.cpp */; };
+		8BE8B3A623683008003DC47D /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BE8B3A423683008003DC47D /* Parser.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +29,9 @@
 		8BE8B39F23682CE3003DC47D /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		8BE8B3A023682CE3003DC47D /* Lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Lexer.cpp; sourceTree = "<group>"; };
 		8BE8B3A123682CE3003DC47D /* Lexer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Lexer.hpp; sourceTree = "<group>"; };
+		8BE8B3A423683008003DC47D /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		8BE8B3A523683008003DC47D /* Parser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Parser.hpp; sourceTree = "<group>"; };
+		8BE8B3A7236835DA003DC47D /* ast.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ast.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +48,9 @@
 		8BE8B38C23682C95003DC47D = {
 			isa = PBXGroup;
 			children = (
+				8BE8B3A7236835DA003DC47D /* ast.h */,
+				8BE8B3A423683008003DC47D /* Parser.cpp */,
+				8BE8B3A523683008003DC47D /* Parser.hpp */,
 				8BE8B3A023682CE3003DC47D /* Lexer.cpp */,
 				8BE8B3A123682CE3003DC47D /* Lexer.hpp */,
 				8BE8B39F23682CE3003DC47D /* main.cpp */,
@@ -117,6 +124,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8BE8B3A323682CE3003DC47D /* Lexer.cpp in Sources */,
+				8BE8B3A623683008003DC47D /* Parser.cpp in Sources */,
 				8BE8B3A223682CE3003DC47D /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -44,14 +44,11 @@ static size_t const ITERIBLE_TOKEN_TYPES[] = { TOKEN_TYPES };
 
 
 class Token {
-private:
-    size_t type; // TOKEN_TYPE ENUM
-    std::string text;
-    int index;
-
 public:
-
-    Token(size_t type, std::string text, int index);
+    const size_t type; // TOKEN_TYPE ENUM
+    const std::string text;
+    const int pos;
+    Token(size_t type, std::string text, int pos) : type(type), text(text), pos(pos) {};
     friend std::ostream& operator<<(std::ostream &out, const Token& t);
 };
 
