@@ -3,11 +3,6 @@ Parser which works with tokens
 """
 from lexer import Lexer, TokenType
 
-class State:
-    S_0 = 0
-    S_FINAL = 1
-    S_LOOP = 2
-
 
 class Parser:
 
@@ -16,7 +11,6 @@ class Parser:
         self.pos = 0
 
     def match(self, expectedType):
-        print(self.pos)
         if self.pos < len(self.tokens):
             token = self.tokens[self.pos]
             if token.type == expectedType:
@@ -25,29 +19,37 @@ class Parser:
 
         return False
 
-    def newState(self, s):
-        if s == State.S_0 or s == State.S_LOOP:
-            if self.match(TokenType.NUMBER):
-                return State.S_FINAL
-            self.error("Ожидалось {}".format(TokenType.NUMBER))
-
-        elif s == State.S_FINAL:
-            if self.match(TokenType.ADD):
-                return State.S_LOOP
-            self.error("Ожидался {}".format(TokenType.ADD))
 
     def parse(self):
-        e1 = self.require(TokenType.NUMBER);
-        e1 = NumberNode(e1.text)
-        while (self.pos < len(self.tokens)):
-            op = self.require(TokenType.ADD);
-            e2 = self.require(TokenType.NUMBER);
-            e2 = NumberNode(e2.text)
+        e1 = self.slag()
+        while self.match(TokenType.ADD):
+            op = self.tokens[self.pos-1]
+            e2 = self.slag()
+            e1 = BimOpNode(op.text, e1, e2)
+
+        return e1
+
+
+    def mnog(self):
+        if self.match(TokenType.LPAR):
+            e = self.parse()
+            self.require(TokenType.RPAR)
+            return e
+        else:
+            e = self.require(TokenType.NUMBER)
+            e = NumberNode(e.text)
+            return e
+
+
+    def slag(self):
+        e1 = self.mnog()
+        while self.match(TokenType.MUL):
+            op = self.tokens[self.pos-1]
+            e2 = self.mnog()
 
             e1 = BimOpNode(op.text, e1, e2)
 
-        return e1;
-
+        return e1
 
     def elem(self):
         if self.match(TokenType.NUMBER):
@@ -64,7 +66,15 @@ class Parser:
         if type(n) is BimOpNode:
             l = self.eval(n.left)
             r = self.eval(n.right)
-            return l+r
+
+            if n.op == '+':
+                return l+r
+            elif n.op == '*':
+                return l*r
+            elif n.op == '-':
+                return l-r
+            elif n.op == '/':
+                return l/r
 
     def require(self, expected):
         if not self.match(expected):
@@ -109,9 +119,12 @@ class BimOpNode:
 
 
 if __name__ == '__main__':
-    text = '10 + 20'
+    text = '10+(19+1)*6+1'
     l = Lexer(text)
     tokens = l.lex()
+    for t in tokens:
+        print("value: {}, token: {}".format(t.text, t.type))
+
     parser = Parser(tokens)
     ast = parser.parse()
 
