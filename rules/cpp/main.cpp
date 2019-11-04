@@ -18,7 +18,8 @@ int main(int argc, const char * argv[]) {
     Parser p(tokens);
     ExprNode* node = p.parse_expression();
 
-    std::cout << "Answer: " << Parser::eval(node) << std::endl;
+    int result = Parser::eval(node);
+    std::cout << "Answer: " << result << std::endl;
     
     return 0;
 }
