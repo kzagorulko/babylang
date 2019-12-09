@@ -35,7 +35,9 @@ private:
 public:
     Parser(std::list<Token> tokens);
     ExprNode* parse_expression();
+    std::list<Block*> parse_blocks(int level=0);
     static int eval(ExprNode* node);
+    static void run(std::list<Block*> blocks);
 };
 
 #include <stdio.h>

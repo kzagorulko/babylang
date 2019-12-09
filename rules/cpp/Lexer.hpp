@@ -15,7 +15,12 @@
 
 #define TOKEN_TYPES \
 X(NUMBER,       "NUMBER",       "[1-9][0-9]*") \
-X(FLOAT_NUMBER, "FLOAT_NUMBER", "[+-]?([0-9]*[.])?[0-9]+") \
+X(FLOAT_NUMBER, "FLOAT_NUMBER", "[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?[0-9]+)?") \
+X(PRINT,        "PRINT",        "print") \
+X(IF,           "IF",           "if") \
+X(THEN,         "THEN",         "then") \
+X(ELSE,         "ELSE",         "else") \
+X(END,          "END",          "end") \
 X(ID,           "ID",           "[a-zA-Z_][a-zA-Z_0-9]*") \
 X(ADD,          "ADD",          "\\+") \
 X(SUB,          "SUB",          "-") \
@@ -23,14 +28,10 @@ X(MUL,          "MUL",          "\\*") \
 X(DIV,          "DIV",          "/") \
 X(LPAR,         "LPAR",         "\\(") \
 X(RPAR,         "RPAR",         "\\)") \
-X(SPACE,        "SPACE",        "[ \t\r\n]+") \
+X(SPACE,        "SPACE",        "[ \t\r\n;]+") \
 X(MORE,         "MORE",         ">") \
 X(LESS,         "LESS",         "<") \
-X(EQUAL,        "EQUAL",        "=") \
-X(PRINT,        "PRINT",        "print") \
-X(IF,           "IF",           "if") \
-X(THEN,         "THEN",         "then") \
-X(END,          "END",          "end")
+X(EQUAL,        "EQUAL",        "=")
 
 
 

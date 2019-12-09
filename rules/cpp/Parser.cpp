@@ -117,6 +117,48 @@ ExprNode* Parser::parse_expression() {
     return e1;
 }
 
+std::list<Block*> Parser::parse_blocks(int level) {
+    std::list<Block*> blocks;
+    std::set<size_t> types {ELSE, END};
+    
+    while ((match(types) == nullptr || level == 0) && (pos < tokens.size())) {
+        
+        if (match(IF) != nullptr) {
+            ExprNode* condition = parse_expression();
+            require(THEN);
+            
+            std::list<Block*> else_block, then_block = parse_blocks(level + 1);
+            
+            if (match(ELSE) != nullptr) {
+                else_block = parse_blocks(level + 1);
+                require(END);
+            } else {
+                require(END);
+            }
+            
+            blocks.push_back(new IfBlock(condition, then_block, else_block));
+        } else if (match(PRINT)) {
+            ExprNode* value = parse_elem();
+            blocks.push_back(new PrintBlock(value));
+        } else {
+            throw std::make_tuple("IllegalCommand", "Parser::parse_blocks", pos);
+        }
+        
+        std::list<Token>::iterator next_token = tokens.begin();
+        std::advance(next_token, pos);
+        
+        if (level == 0 && match(END)) {
+            throw std::make_tuple("Unexepted exit", "Parser::parse_blocks", pos);
+        }
+        
+        
+    }
+    
+    pos--;
+    
+    return blocks;
+}
+
 int Parser::eval(ExprNode* node) {
     switch (node->type) {
         case NUMBER_NODE:
@@ -159,4 +201,30 @@ int Parser::eval(ExprNode* node) {
     }
     
     return 1;
+}
+
+void Parser::run(std::list<Block*> blocks) {
+    for (Block* block:blocks) {
+        switch (block->type) {
+            case IF_BLOCK:
+            {
+                IfBlock if_blcok = *((IfBlock*)block);
+                if (eval(const_cast<ExprNode*>(if_blcok.condition))) {
+                    run(if_blcok.then_block);
+                } else {
+                    run(if_blcok.else_block);
+                }
+            }
+                break;
+            case PRINT_BLOCK:
+            {
+                PrintBlock print_block = *((PrintBlock*)block);
+                std::cout << eval(const_cast<ExprNode*>(print_block.value)) << std::endl;
+            }
+                break;
+                
+            default:
+                break;
+        }
+    }
 }

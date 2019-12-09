@@ -11,7 +11,7 @@
 
 #include "Lexer.hpp"
 
-enum AST_TYPES {NUMBER_NODE, VAR_NODE, BIN_OP_NODE};
+enum AST_TYPES {NUMBER_NODE, VAR_NODE, BIN_OP_NODE, IF_BLOCK, PRINT_BLOCK};
 
 class ExprNode {
 public:
@@ -37,6 +37,28 @@ public:
     const ExprNode* left;
     const ExprNode* right;
     BinOpNode(Token* op, ExprNode* left, ExprNode* right): ExprNode(BIN_OP_NODE), op(op), left(left), right(right) {}
+};
+
+// Blocks
+
+class Block {
+public:
+    const size_t type;
+    Block(size_t type): type(type) {}
+};
+
+class IfBlock : public Block {
+public:
+    const ExprNode* condition;
+    const std::list<Block*> then_block;
+    const std::list<Block*> else_block;
+    IfBlock(ExprNode* condition, std::list<Block*> then_block, std::list<Block*> else_block): Block(IF_BLOCK), condition(condition), then_block(then_block), else_block(else_block) {}
+};
+
+class PrintBlock : public Block {
+public:
+    const ExprNode* value;
+    PrintBlock(ExprNode* value): Block(PRINT_BLOCK), value(value) {}
 };
 
 #endif /* ast_h */

@@ -16,9 +16,8 @@
 class Utils {
 public:
     static bool is_number(const std::string& s) {
-        std::string::const_iterator it = s.begin();
-        while (it != s.end() && std::isdigit(*it)) ++it;
-        return !s.empty() && it == s.end();
+        std::regex num("[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?[0-9]+)?");
+        return std::regex_match(s, num);
     }
 };
 
