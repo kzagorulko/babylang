@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include "Utils.hpp"
 #include "Lexer.hpp"
 
 enum State { S_0, S_FINAL, S_LOOP };
@@ -24,11 +25,11 @@ private:
     int pos;
     std::list<Token> tokens;
     
-    void error(std::string message);
     Token* match(std::set<size_t> types);
     Token* match(size_t type);
     Token require(size_t type);
     ExprNode* parse_elem();
+    ExprNode* parse_logical();
     ExprNode* parse_summand();
     ExprNode* parse_bracketed();
 public:

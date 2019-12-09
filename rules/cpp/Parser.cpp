@@ -16,18 +16,6 @@ Parser::Parser(std::list<Token> tokens): pos(0) {
     }
 }
 
-void Parser::error(std::string message) {
-    if (pos < tokens.size()) {
-        std::list<Token>::iterator it = tokens.begin();
-        std::advance(it, pos);
-        std::string m, f_message = message + " at position " + std::to_string(it->pos);
-        m = f_message;
-        throw m;
-    } else {
-        throw message + " at the end of file";
-    }
-}
-
 Token* Parser::match(std::set<size_t> types) {
     if (pos < tokens.size()) {
         std::list<Token>::iterator it = tokens.begin();
@@ -55,7 +43,7 @@ Token* Parser::match(size_t type) {
 Token Parser::require(size_t type) {
     Token* t = match(type);
     if (t == nullptr) {
-        error("Expected " + std::string(TOKEN_NAME[type]));
+        throw std::make_tuple("Expected " + std::string(TOKEN_NAME[type]), "Parser::require", pos);
     }
     return *t;
 }
@@ -69,7 +57,7 @@ ExprNode* Parser::parse_elem() {
     if (id != nullptr) {
         return new VarNode(id);
     }
-    error("Expected number or variable");
+    throw std::make_tuple("Expected number or variable", "Parser::parse_elem", pos);
     return nullptr;
 }
 
@@ -91,10 +79,11 @@ ExprNode* Parser::parse_summand() {
         ExprNode* e2 = parse_bracketed();
         e1 = new BinOpNode(op, e1, e2);
     }
+    
     return e1;
 }
 
-ExprNode* Parser::parse_expression() {
+ExprNode* Parser::parse_logical() {
     ExprNode* e1 = parse_summand();
     Token* op;
     std::set<size_t> types {ADD, SUB};
@@ -103,6 +92,28 @@ ExprNode* Parser::parse_expression() {
         ExprNode* e2 = parse_summand();
         e1 = new BinOpNode(op, e1, e2);
     }
+    
+    return e1;
+}
+
+ExprNode* Parser::parse_expression() {
+    ExprNode* e1 = parse_logical();
+    Token* op;
+    std::set<size_t> types {LESS, MORE, EQUAL};
+    std::set<size_t> wrong_types {NUMBER, FLOAT_NUMBER, LPAR};
+    
+    while ((op = match(types)) != nullptr) {
+        ExprNode* e2 = parse_logical();
+        e1 = new BinOpNode(op, e1, e2);
+    }
+    
+    std::list<Token>::iterator next_token = tokens.begin();
+    std::advance(next_token, pos);
+    
+    if ((pos < tokens.size()) && (op == nullptr) && (match(wrong_types) != nullptr)) {
+        throw std::make_tuple("Expected a opertor", "Parser::parce_expression", pos);
+    }
+    
     return e1;
 }
 
@@ -117,28 +128,35 @@ int Parser::eval(ExprNode* node) {
                 int l = eval((ExprNode *) bon.left);
                 int r = eval((ExprNode *) bon.right);
                 switch (bon.op->type) {
-                    case ADD: return l + r;
-                    case SUB: return l - r;
-                    case MUL: return l * r;
-                    case DIV: return l / r;
+                    case ADD:   return l + r;
+                    case SUB:   return l - r;
+                    case MUL:   return l * r;
+                    case DIV:   return l / r;
+                    case LESS:  return l < r;
+                    case MORE:  return l > r;
+                    case EQUAL: return l == r;
                 }
         }
             break;
             
         case VAR_NODE:
         {
-            int value;
+            std::string value;
+            
             VarNode vn = *((VarNode*) node);
             std::cout << "Enter value " << vn.var->text << ": ";
             std::cin >> value;
-            return value;
+            if (!Utils::is_number(value)) {
+                throw std::make_pair("Expected a number", "Parser::eval");
+            }
+            return std::stof(value);
         }
             break;
             
         default:
-            throw "IllegalStateException";
+            throw std::make_pair("IllegalStateException", "Parser::eval");
             break;
     }
     
-    return 69;
+    return 1;
 }

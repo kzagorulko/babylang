@@ -14,15 +14,25 @@
 #include <list>
 
 #define TOKEN_TYPES \
-X(NUMBER,   "NUMBER",   "[1-9][0-9]*") \
-X(ID,       "ID",       "[a-zA-Z_][a-zA-Z_0-9]*") \
-X(ADD,      "ADD",      "\\+") \
-X(SUB,      "SUB",      "-") \
-X(MUL,      "MUL",      "\\*") \
-X(DIV,      "DIV",      "/") \
-X(LPAR,     "LPAR",     "\\(") \
-X(RPAR,     "RPAR",     "\\)") \
-X(SPACE,    "SPACE",    "[ \t\r\n]+")
+X(NUMBER,       "NUMBER",       "[1-9][0-9]*") \
+X(FLOAT_NUMBER, "FLOAT_NUMBER", "[+-]?([0-9]*[.])?[0-9]+") \
+X(ID,           "ID",           "[a-zA-Z_][a-zA-Z_0-9]*") \
+X(ADD,          "ADD",          "\\+") \
+X(SUB,          "SUB",          "-") \
+X(MUL,          "MUL",          "\\*") \
+X(DIV,          "DIV",          "/") \
+X(LPAR,         "LPAR",         "\\(") \
+X(RPAR,         "RPAR",         "\\)") \
+X(SPACE,        "SPACE",        "[ \t\r\n]+") \
+X(MORE,         "MORE",         ">") \
+X(LESS,         "LESS",         "<") \
+X(EQUAL,        "EQUAL",        "=") \
+X(PRINT,        "PRINT",        "print") \
+X(IF,           "IF",           "if") \
+X(THEN,         "THEN",         "then") \
+X(END,          "END",          "end")
+
+
 
 #define X(type, strType, regex) regex,
 static char const *TOKEN_REGEX[] = { TOKEN_TYPES };
