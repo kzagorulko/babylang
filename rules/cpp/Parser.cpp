@@ -16,24 +16,28 @@ Parser::Parser(std::list<Token> tokens): pos(0) {
     }
 }
 
-Token* Parser::match(std::set<size_t> types) {
+Token* Parser::match(std::set<size_t> types, bool add_pos) {
     if (pos < tokens.size()) {
         std::list<Token>::iterator it = tokens.begin();
         std::advance(it, pos);
         if (types.count(it->type) > 0) {
-            pos++;
+            if (add_pos) {
+                pos++;
+            }
             return &*it;
         }
     }
     return nullptr;
 }
 
-Token* Parser::match(size_t type) {
+Token* Parser::match(size_t type, bool add_pos) {
     if (pos < tokens.size()) {
         std::list<Token>::iterator it = tokens.begin();
         std::advance(it, pos);
         if (it->type == type) {
-            pos++;
+            if (add_pos) {
+                pos++;
+            }
             return &*it;
         }
     }
@@ -121,7 +125,7 @@ std::list<Block*> Parser::parse_blocks(int level) {
     std::list<Block*> blocks;
     std::set<size_t> types {ELSE, END};
     
-    while ((match(types) == nullptr || level == 0) && (pos < tokens.size())) {
+    while ((match(types, false) == nullptr || level == 0) && (pos < tokens.size())) {
         
         if (match(IF) != nullptr) {
             ExprNode* condition = parse_expression();
@@ -143,18 +147,7 @@ std::list<Block*> Parser::parse_blocks(int level) {
         } else {
             throw std::make_tuple("IllegalCommand", "Parser::parse_blocks", pos);
         }
-        
-        std::list<Token>::iterator next_token = tokens.begin();
-        std::advance(next_token, pos);
-        
-        if (level == 0 && match(END)) {
-            throw std::make_tuple("Unexepted exit", "Parser::parse_blocks", pos);
-        }
-        
-        
     }
-    
-    pos--;
     
     return blocks;
 }

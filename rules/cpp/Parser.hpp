@@ -25,8 +25,8 @@ private:
     int pos;
     std::list<Token> tokens;
     
-    Token* match(std::set<size_t> types);
-    Token* match(size_t type);
+    Token* match(std::set<size_t> types, bool add_pos=true);
+    Token* match(size_t type, bool add_pos=true);
     Token require(size_t type);
     ExprNode* parse_elem();
     ExprNode* parse_logical();

@@ -26,7 +26,7 @@ int main(int argc, const char * argv[]) {
             return 4;
         }
     } else {
-        src = "end; then print 32; else  print 2; end; print 3; print 4; print 5;";
+        src = "print 5;"; // write your code here
     }
     
     Lexer l(src);
