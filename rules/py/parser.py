@@ -10,29 +10,38 @@ class Parser:
         self.tokens = tokens
         self.pos = 0
 
-    def match(self, expectedType):
+    def match(self, expectedTypes):
         if self.pos < len(self.tokens):
             token = self.tokens[self.pos]
-            if token.type == expectedType:
+            if token.type in expectedTypes:
                 self.pos += 1
                 return True
 
         return False
 
 
-    def parse(self):
+    def expr(self):
         e1 = self.slag()
-        while self.match(TokenType.ADD):
+        while self.match([TokenType.ADD, TokenType.SUB]):
             op = self.tokens[self.pos-1]
             e2 = self.slag()
             e1 = BimOpNode(op.text, e1, e2)
 
         return e1
 
+    def logic_expr(self):
+        e1 = self.expr()
+        while self.match([TokenType.MORE, TokenType.LESS, TokenType.EMORE, TokenType.ELESS]):
+            op = self.tokens[self.pos-1]
+            e2 = self.expr()
+            e1 = BimOpNode(op.text, e1, e2)
+
+        return e1
+
 
     def mnog(self):
-        if self.match(TokenType.LPAR):
-            e = self.parse()
+        if self.match([TokenType.LPAR]):
+            e = self.expr()
             self.require(TokenType.RPAR)
             return e
         else:
@@ -43,7 +52,7 @@ class Parser:
 
     def slag(self):
         e1 = self.mnog()
-        while self.match(TokenType.MUL):
+        while self.match([TokenType.MUL, TokenType.DIV]):
             op = self.tokens[self.pos-1]
             e2 = self.mnog()
 
@@ -52,12 +61,11 @@ class Parser:
         return e1
 
     def elem(self):
-        if self.match(TokenType.NUMBER):
+        if self.match([TokenType.NUMBER]):
             return NumberNode(self.tokens[self.pos])
-        if self.match(TokenType.ID):
+        if self.match([TokenType.ID]):
             return VarNode(self.tokens[self.pos])
-
-        self.error("Ожидалось число или ид")
+        self.error("Ожидалось число или ID")
 
 
     def eval(self, n):
@@ -75,15 +83,22 @@ class Parser:
                 return l-r
             elif n.op == '/':
                 return l/r
+            elif n.op == '>':
+                return l>r
+            elif n.op == '<':
+                return l<r
+            elif n.op == '>=':
+                return l>=r
+            elif n.op == '<=':
+                return l<=r
 
     def require(self, expected):
-        if not self.match(expected):
-            self.error("Ожидается " + expected.value[0] + " " + self.tokens[self.pos].text)
+        if not self.match([expected]):
+            self.error("Ожидалось " + expected.value[0] + " " + self.tokens[self.pos].text)
         return self.tokens[self.pos-1]
 
     def error(self, msg):
         raise Exception("{} at {}".format(msg, self.pos))
-
 
 # построение AST
 # x+2*y
@@ -119,15 +134,17 @@ class BimOpNode:
 
 
 if __name__ == '__main__':
-    text = '10+(19+1)*6+1'
+    #text = '10+(19+1)*6/2-1'
+    text = '1+2 > 3+4'
     l = Lexer(text)
     tokens = l.lex()
     for t in tokens:
         print("value: {}, token: {}".format(t.text, t.type))
 
     parser = Parser(tokens)
-    ast = parser.parse()
-
+    #ast = parser.expr()
+    ast = parser.logic_expr()
+    print(ast)
     result = parser.eval(ast)
 
     print(result)
