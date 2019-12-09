@@ -114,7 +114,7 @@ ExprNode* Parser::parse_expression() {
     std::list<Token>::iterator next_token = tokens.begin();
     std::advance(next_token, pos);
     
-    if ((pos < tokens.size()) && (op == nullptr) && (match(wrong_types) != nullptr)) {
+    if (pos < tokens.size() && op == nullptr && match(wrong_types) != nullptr) {
         throw std::make_tuple("Expected a opertor", "Parser::parce_expression", pos);
     }
     
