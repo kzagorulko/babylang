@@ -6,6 +6,8 @@ from lexer import Lexer, TokenType
 
 class Parser:
 
+    variables = {}
+
     def __init__(self, tokens):
         self.tokens = tokens
         self.pos = 0
@@ -38,15 +40,67 @@ class Parser:
 
         return e1
 
+    def statement(self, list = []):
+
+        while self.match([TokenType.PRINT, TokenType.ID, TokenType.IF]):
+            statement = self.tokens[self.pos-1]
+
+            print(statement.type)
+            print(statement.text)
+
+            if statement.type == TokenType.PRINT:
+                expr = self.expr()
+
+                list.append(StatementNode(statement, expr))
+            elif statement.type == TokenType.ID:
+                print(self.tokens[self.pos].type)
+                self.require([TokenType.ASSIGN])
+                expr = self.expr()
+
+                list.append(StatementNode(statement, expr))
+            elif statement.type == TokenType.IF:
+                expr = self.logic_expr()
+                self.require([TokenType.THEN])
+
+                node = StatementNode(statement, expr)
+                list.append(node)
+                self.statement(node.s_then)
+
+                if self.match([TokenType.ELSE]):
+                    self.statement(node.s_else)
+
+        return list
+
+
+    def eval_statement(self, list):
+        for item in list:
+            if type(item) is StatementNode:
+                # print
+                if item.statement.type == TokenType.PRINT:
+                    print(self.eval(item.expr))
+
+                # assign
+                if item.statement.type == TokenType.ID:
+                    self.variables[item.statement.text] = self.eval(item.expr)
+
+                # if
+                if item.statement.type == TokenType.IF:
+                    if self.eval(item.expr):
+                        self.eval_statement(item.s_then)
+                    else:
+                        self.eval_statement(item.s_else)
 
     def mnog(self):
         if self.match([TokenType.LPAR]):
             e = self.expr()
-            self.require(TokenType.RPAR)
+            self.require([TokenType.RPAR])
             return e
         else:
-            e = self.require(TokenType.NUMBER)
-            e = NumberNode(e.text)
+            e = self.require([TokenType.NUMBER, TokenType.ID])
+            if e.type == TokenType.ID:
+                e = VarNode(e.text)
+            else:
+                e = NumberNode(e.text)
             return e
 
 
@@ -71,6 +125,8 @@ class Parser:
     def eval(self, n):
         if type(n) is NumberNode:
             return int(n.number)
+        if type(n) is VarNode:
+            return int(self.variables[n.var])
         if type(n) is BimOpNode:
             l = self.eval(n.left)
             r = self.eval(n.right)
@@ -91,9 +147,11 @@ class Parser:
                 return l>=r
             elif n.op == '<=':
                 return l<=r
+            elif n.op == '=':
+                return l==r
 
-    def require(self, expected):
-        if not self.match([expected]):
+    def require(self, expecteds):
+        if not self.match(expecteds):
             self.error("Ожидалось " + expected.value[0] + " " + self.tokens[self.pos].text)
         return self.tokens[self.pos-1]
 
@@ -131,11 +189,34 @@ class BimOpNode:
         self.left = left
         self.right = right
 
+class StatementNode:
+    #statement;
+    def __init__(self, statement, ast):
+        self.statement = statement
+        self.expr = ast
+        self.s_then = []
+        self.s_else = []
+
+    def append(self, statement):
+        self.list.append(statement)
 
 
 if __name__ == '__main__':
-    #text = '10+(19+1)*6/2-1'
-    text = '1+2 > 3+4'
+    # text = '10+(19+1)*6/2-1'
+    # text = '1+2 > 3+4'
+    # statement print
+    text = """
+        print 1
+        if 1+1 > 0 then
+            print 10*10/5
+            a := 3
+            print a+2
+            a := a * 2
+            if a > 5 then
+                print 100
+            else
+                print 200
+    """
     l = Lexer(text)
     tokens = l.lex()
     for t in tokens:
@@ -143,8 +224,9 @@ if __name__ == '__main__':
 
     parser = Parser(tokens)
     #ast = parser.expr()
-    ast = parser.logic_expr()
+    #ast = parser.logic_expr()
+    ast = parser.statement()
     print(ast)
-    result = parser.eval(ast)
-
-    print(result)
+    print("--- EXEC ---")
+    result = parser.eval_statement(ast)
+    print(parser.variables)

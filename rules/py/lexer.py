@@ -11,6 +11,12 @@ class TokenType(Enum):
     LESS = "<",
     EMORE = ">=",
     ELESS = "<=",
+    EQUIV = "=",
+    ASSIGN = ":=",
+    PRINT = "print",
+    IF = 'if'
+    THEN = 'then'
+    ELSE = 'else'
     SPACE = "[ \\t\\r\\n]+",
     LPAR = "\\(",
     RPAR = "\\)",
