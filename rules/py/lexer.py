@@ -2,7 +2,6 @@ from enum import Enum
 import re
 
 class TokenType(Enum):
-    NUMBER = "[0-9]+",
     ADD = "\\+",
     SUB = "\\-",
     MUL = "\\*",
@@ -17,10 +16,13 @@ class TokenType(Enum):
     IF = 'if'
     THEN = 'then'
     ELSE = 'else'
+    END = 'end'
+    SEMICOLON = ';'
     SPACE = "[ \\t\\r\\n]+",
     LPAR = "\\(",
     RPAR = "\\)",
     ID = "[a-zA-Z_][a-zA-Z0-9_]*"
+    NUMBER = "0|[1-9a-fA-F][0-9a-fA-F]*",
 
 
 class Token:

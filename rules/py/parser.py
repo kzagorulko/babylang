@@ -40,7 +40,8 @@ class Parser:
 
         return e1
 
-    def statement(self, list = []):
+    def statement(self):
+        list = []
 
         while self.match([TokenType.PRINT, TokenType.ID, TokenType.IF]):
             statement = self.tokens[self.pos-1]
@@ -64,10 +65,14 @@ class Parser:
 
                 node = StatementNode(statement, expr)
                 list.append(node)
-                self.statement(node.s_then)
+                node.s_then = self.statement()
 
                 if self.match([TokenType.ELSE]):
-                    self.statement(node.s_else)
+                    node.s_else = self.statement()
+
+                self.require([TokenType.END])
+
+            self.require([TokenType.SEMICOLON])
 
         return list
 
@@ -124,9 +129,9 @@ class Parser:
 
     def eval(self, n):
         if type(n) is NumberNode:
-            return int(n.number)
+            return int(str(n.number), 16)
         if type(n) is VarNode:
-            return int(self.variables[n.var])
+            return int(str(self.variables[n.var]), 16)
         if type(n) is BimOpNode:
             l = self.eval(n.left)
             r = self.eval(n.right)
@@ -152,7 +157,7 @@ class Parser:
 
     def require(self, expecteds):
         if not self.match(expecteds):
-            self.error("Ожидалось " + expected.value[0] + " " + self.tokens[self.pos].text)
+            self.error("Ожидалось " + expecteds[0].value[0] + " " + self.tokens[self.pos].text)
         return self.tokens[self.pos-1]
 
     def error(self, msg):
@@ -206,17 +211,22 @@ if __name__ == '__main__':
     # text = '1+2 > 3+4'
     # statement print
     text = """
-        print 1
+        print 1a;
         if 1+1 > 0 then
-            print 10*10/5
-            a := 3
-            print a+2
-            a := a * 2
+            print 10*10/5;
+            a := 3;
+            print a+2;
+            a := a * 2;
+
             if a > 5 then
-                print 100
+                print 100;
             else
-                print 200
+                print 200;
+            end;
+        end;
+        b := 23f;
     """
+    
     l = Lexer(text)
     tokens = l.lex()
     for t in tokens:
