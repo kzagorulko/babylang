@@ -14,15 +14,26 @@
 #include <list>
 
 #define TOKEN_TYPES \
-X(NUMBER,   "NUMBER",   "[1-9][0-9]*") \
-X(ID,       "ID",       "[a-zA-Z_][a-zA-Z_0-9]*") \
-X(ADD,      "ADD",      "\\+") \
-X(SUB,      "SUB",      "-") \
-X(MUL,      "MUL",      "\\*") \
-X(DIV,      "DIV",      "/") \
-X(LPAR,     "LPAR",     "\\(") \
-X(RPAR,     "RPAR",     "\\)") \
-X(SPACE,    "SPACE",    "[ \t\r\n]+")
+X(NUMBER,       "NUMBER",       "[1-9][0-9]*") \
+X(FLOAT_NUMBER, "FLOAT_NUMBER", "[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?[0-9]+)?") \
+X(PRINT,        "PRINT",        "print") \
+X(IF,           "IF",           "if") \
+X(THEN,         "THEN",         "then") \
+X(ELSE,         "ELSE",         "else") \
+X(END,          "END",          "end") \
+X(ID,           "ID",           "[a-zA-Z_][a-zA-Z_0-9]*") \
+X(ADD,          "ADD",          "\\+") \
+X(SUB,          "SUB",          "-") \
+X(MUL,          "MUL",          "\\*") \
+X(DIV,          "DIV",          "/") \
+X(LPAR,         "LPAR",         "\\(") \
+X(RPAR,         "RPAR",         "\\)") \
+X(SPACE,        "SPACE",        "[ \t\r\n;]+") \
+X(MORE,         "MORE",         ">") \
+X(LESS,         "LESS",         "<") \
+X(EQUAL,        "EQUAL",        "=")
+
+
 
 #define X(type, strType, regex) regex,
 static char const *TOKEN_REGEX[] = { TOKEN_TYPES };
@@ -44,14 +55,11 @@ static size_t const ITERIBLE_TOKEN_TYPES[] = { TOKEN_TYPES };
 
 
 class Token {
-private:
-    size_t type; // TOKEN_TYPE ENUM
-    std::string text;
-    int index;
-
 public:
-
-    Token(size_t type, std::string text, int index);
+    const size_t type; // TOKEN_TYPE ENUM
+    const std::string text;
+    const int pos;
+    Token(size_t type, std::string text, int pos) : type(type), text(text), pos(pos) {};
     friend std::ostream& operator<<(std::ostream &out, const Token& t);
 };
 
