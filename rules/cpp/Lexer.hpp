@@ -28,9 +28,10 @@ X(MUL,          "MUL",          "\\*") \
 X(DIV,          "DIV",          "/") \
 X(LPAR,         "LPAR",         "\\(") \
 X(RPAR,         "RPAR",         "\\)") \
-X(SPACE,        "SPACE",        "[ \t\r\n;]+") \
+X(SPACE,        "SPACE",        "[ \t\r;]+") \
 X(MORE,         "MORE",         ">") \
 X(LESS,         "LESS",         "<") \
+X(NEXT_LINE,    "NEXT_LINE",    "[\n]") \
 X(EQUAL,        "EQUAL",        "=")
 
 
@@ -58,8 +59,8 @@ class Token {
 public:
     const size_t type; // TOKEN_TYPE ENUM
     const std::string text;
-    const int pos;
-    Token(size_t type, std::string text, int pos) : type(type), text(text), pos(pos) {};
+    const std::pair<int, int> pos_in_text;
+    Token(size_t type, std::string text, std::pair<int, int> pos_in_text) : type(type), text(text), pos_in_text(pos_in_text) {};
     friend std::ostream& operator<<(std::ostream &out, const Token& t);
 };
 
@@ -69,10 +70,13 @@ class Lexer {
 private:
     std::string src;
     int pos;
+    int row;
+    int symbol;
     std::list<Token> tokens;
+    std::pair<int, int> get_position(std::list<int> location);
     
 public:
-    Lexer(std::string src);
+    Lexer(std::string src): src(src), pos(0), row(1), symbol(1) {}
     std::list<Token> lex();
     
 };
