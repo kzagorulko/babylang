@@ -9,6 +9,7 @@
 #ifndef Parser_hpp
 #define Parser_hpp
 
+#include <map>
 #include <set>
 #include <list>
 
@@ -36,8 +37,8 @@ public:
     Parser(std::list<Token> tokens);
     ExprNode* parse_expression();
     std::list<Block*> parse_blocks(int level=0);
-    static int eval(ExprNode* node);
-    static void run(std::list<Block*> blocks);
+    static std::pair<int, std::map<std::string, float>> eval(ExprNode* node, std::map<std::string, float> variables);
+    static void run(std::list<Block*> blocks, std::map<std::string, float> variables);
 };
 
 #include <stdio.h>

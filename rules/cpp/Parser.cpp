@@ -10,8 +10,8 @@
 
 Parser::Parser(std::list<Token> tokens): pos(0) {
     for (Token t:tokens) {
-        if (t.type != SPACE) {
-            this->tokens.push_back(Token(t.type, t.text, t.pos));
+        if (t.type != SPACE and t.type != NEXT_LINE) {
+            this->tokens.push_back(Token(t.type, t.text, t.pos_in_text));
         }
     }
 }
@@ -47,7 +47,9 @@ Token* Parser::match(size_t type, bool add_pos) {
 Token Parser::require(size_t type) {
     Token* t = match(type);
     if (t == nullptr) {
-        throw std::make_tuple("Expected " + std::string(TOKEN_NAME[type]), "Parser::require", pos);
+        std::list<Token>::iterator next_token = tokens.begin();
+        std::advance(next_token, pos);
+        throw std::make_tuple("Expected " + std::string(TOKEN_NAME[type]), "Parser::require", next_token->pos_in_text);
     }
     return *t;
 }
@@ -61,7 +63,10 @@ ExprNode* Parser::parse_elem() {
     if (id != nullptr) {
         return new VarNode(id);
     }
-    throw std::make_tuple("Expected number or variable", "Parser::parse_elem", pos);
+    
+    std::list<Token>::iterator next_token = tokens.begin();
+    std::advance(next_token, pos - 1);
+    throw std::make_tuple("Expected number or variable", "Parser::parse_elem", next_token->pos_in_text);
     return nullptr;
 }
 
@@ -115,7 +120,9 @@ ExprNode* Parser::parse_expression() {
     std::advance(next_token, pos);
     
     if (pos < tokens.size() && op == nullptr && match(wrong_types) != nullptr) {
-        throw std::make_tuple("Expected a opertor", "Parser::parce_expression", pos);
+        std::list<Token>::iterator next_token = tokens.begin();
+        std::advance(next_token, pos);
+        throw std::make_tuple("Expected a opertor", "Parser::parce_expression", next_token->pos_in_text);
     }
     
     return e1;
@@ -145,31 +152,35 @@ std::list<Block*> Parser::parse_blocks(int level) {
             ExprNode* value = parse_elem();
             blocks.push_back(new PrintBlock(value));
         } else {
-            throw std::make_tuple("IllegalCommand", "Parser::parse_blocks", pos);
+            std::list<Token>::iterator next_token = tokens.begin();
+            std::advance(next_token, pos);
+            throw std::make_tuple("IllegalCommand", "Parser::parse_blocks", next_token->pos_in_text);
         }
     }
     
     return blocks;
 }
 
-int Parser::eval(ExprNode* node) {
+std::pair<int, std::map<std::string, float>> Parser::eval(ExprNode* node, std::map<std::string, float> variables) {
     switch (node->type) {
         case NUMBER_NODE:
-            return std::stoi((((NumberNode*) node)->number)->text);
+            return std::make_pair(std::stoi((((NumberNode*) node)->number)->text), variables);
             break;
         case BIN_OP_NODE:
         {
-                BinOpNode bon = *((BinOpNode*) node);
-                int l = eval((ExprNode *) bon.left);
-                int r = eval((ExprNode *) bon.right);
-                switch (bon.op->type) {
-                    case ADD:   return l + r;
-                    case SUB:   return l - r;
-                    case MUL:   return l * r;
-                    case DIV:   return l / r;
-                    case LESS:  return l < r;
-                    case MORE:  return l > r;
-                    case EQUAL: return l == r;
+            BinOpNode bon = *((BinOpNode*) node);
+            std::pair<int, std::map<std::string, float>> l = eval((ExprNode *) bon.left, variables);
+            std::pair<int, std::map<std::string, float>> r = eval((ExprNode *) bon.right, variables);
+            std::map<std::string, float> shared = l.second;
+            shared.insert(r.second.begin(), r.second.end());
+            switch (bon.op->type) {
+                case ADD:   return std::make_pair(l.first + r.first, shared);
+                case SUB:   return std::make_pair(l.first - r.first, shared);
+                case MUL:   return std::make_pair(l.first * r.first, shared);
+                case DIV:   return std::make_pair(l.first / r.first, shared);
+                case LESS:  return std::make_pair(l.first < r.first, shared);
+                case MORE:  return std::make_pair(l.first > r.first, shared);
+                case EQUAL: return std::make_pair(l.first == r.first, shared);
                 }
         }
             break;
@@ -177,14 +188,24 @@ int Parser::eval(ExprNode* node) {
         case VAR_NODE:
         {
             std::string value;
+            float result;
             
             VarNode vn = *((VarNode*) node);
-            std::cout << "Enter value " << vn.var->text << ": ";
-            std::cin >> value;
-            if (!Utils::is_number(value)) {
-                throw std::make_pair("Expected a number", "Parser::eval");
+            std::map<std::string, float>::iterator it = variables.find(vn.var->text);
+            if (it == variables.end()) {
+                std::cout << "Enter value " << vn.var->text << ": ";
+                std::cin >> value;
+                if (!Utils::is_number(value)) {
+                    throw std::make_pair("Expected a number", "Parser::eval");
+                }
+                variables[vn.var->text] = std::stof(value);
+                result = variables[vn.var->text];
+            } else {
+                result = it->second;
+                
             }
-            return std::stof(value);
+            
+            return std::make_pair(result, variables);
         }
             break;
             
@@ -193,29 +214,31 @@ int Parser::eval(ExprNode* node) {
             break;
     }
     
-    return 1;
+    return std::make_pair(0, variables);
 }
 
-void Parser::run(std::list<Block*> blocks) {
+void Parser::run(std::list<Block*> blocks, std::map<std::string, float> variables) {
     for (Block* block:blocks) {
         switch (block->type) {
             case IF_BLOCK:
             {
                 IfBlock if_blcok = *((IfBlock*)block);
-                if (eval(const_cast<ExprNode*>(if_blcok.condition))) {
-                    run(if_blcok.then_block);
+                std::pair<int, std::map<std::string, float>> meta = eval(const_cast<ExprNode*>(if_blcok.condition), variables);
+                if (meta.first) {
+                    run(if_blcok.then_block, variables);
                 } else {
-                    run(if_blcok.else_block);
+                    run(if_blcok.else_block, variables);
                 }
             }
                 break;
             case PRINT_BLOCK:
             {
                 PrintBlock print_block = *((PrintBlock*)block);
-                std::cout << eval(const_cast<ExprNode*>(print_block.value)) << std::endl;
+                std::pair<int, std::map<std::string, float>> result = eval(const_cast<ExprNode*>(print_block.value), variables);
+                std::cout << result.first << std::endl;
+                variables = result.second;;
             }
                 break;
-                
             default:
                 break;
         }
