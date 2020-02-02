@@ -14,8 +14,7 @@
 #include <list>
 
 #define TOKEN_TYPES \
-X(NUMBER,       "NUMBER",       "[1-9][0-9]*") \
-X(FLOAT_NUMBER, "FLOAT_NUMBER", "[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?[0-9]+)?") \
+X(NUMBER,       "NUMBER",       "[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?[0-9]+)?") \
 X(PRINT,        "PRINT",        "print") \
 X(IF,           "IF",           "if") \
 X(THEN,         "THEN",         "then") \
