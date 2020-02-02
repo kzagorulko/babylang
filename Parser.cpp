@@ -109,7 +109,7 @@ ExprNode* Parser::parse_expression() {
     ExprNode* e1 = parse_logical();
     Token* op;
     std::set<size_t> types {LESS, MORE, EQUAL};
-    std::set<size_t> wrong_types {NUMBER, FLOAT_NUMBER, LPAR};
+    std::set<size_t> wrong_types {NUMBER, LPAR};
     
     while ((op = match(types)) != nullptr) {
         ExprNode* e2 = parse_logical();
@@ -164,7 +164,7 @@ std::list<Block*> Parser::parse_blocks(int level) {
 std::pair<int, std::map<std::string, float>> Parser::eval(ExprNode* node, std::map<std::string, float> variables) {
     switch (node->type) {
         case NUMBER_NODE:
-            return std::make_pair(std::stoi((((NumberNode*) node)->number)->text), variables);
+            return std::make_pair(std::stof((((NumberNode*) node)->number)->text), variables);
             break;
         case BIN_OP_NODE:
         {

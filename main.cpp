@@ -26,7 +26,11 @@ int main(int argc, const char * argv[]) {
             return 4;
         }
     } else {
-        src = ""; // write your code here
+        src = "print 1e4;"; // write your code here
+    }
+    
+    if (src == "") {
+        return 0;
     }
     
     Lexer l(src);
